@@ -36,14 +36,10 @@ jobs:
 
   deploy-dev:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: dev
     steps:
       - uses: actions/checkout@v4
-      - name: Set up kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG_DEV }}" | base64 -d > ~/.kube/config
       - name: Deploy to dev
         run: |
           kubectl set image deployment/my-app my-app=${{ needs.build-and-push.outputs.image }} -n dev
@@ -51,14 +47,10 @@ jobs:
 
   deploy-prod:
     needs: [build-and-push, deploy-dev]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     environment: prod
     steps:
       - uses: actions/checkout@v4
-      - name: Set up kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG_PROD }}" | base64 -d > ~/.kube/config
       - name: Deploy to prod
         run: |
           kubectl set image deployment/my-app my-app=${{ needs.build-and-push.outputs.image }} -n prod
